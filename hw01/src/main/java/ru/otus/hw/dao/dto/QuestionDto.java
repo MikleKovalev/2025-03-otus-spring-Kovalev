@@ -11,7 +11,6 @@ import java.util.List;
 
 @Data
 public class QuestionDto {
-
     @CsvBindByPosition(position = 0)
     private String text;
 
