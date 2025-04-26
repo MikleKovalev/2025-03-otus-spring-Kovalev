@@ -7,6 +7,10 @@ import ru.otus.hw.domain.Question;
 @Service
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
+    private static final int INVALID_ANSWER_NUMBER = -1;
+
+    private static final int MIN_ANSWER_NUMBER = 1;
+
     private final IOService ioService;
 
     @Override
@@ -15,7 +19,7 @@ public class QuestionServiceImpl implements QuestionService {
         for (int i = 0; i < question.answers().size(); ++i) {
             ioService.printFormattedLine(
                     "%d) %s",
-                    i + 1,
+                    i + MIN_ANSWER_NUMBER,
                     question.answers().get(i).text());
         }
         ioService.printLine("What is number of the right answer?");
@@ -25,14 +29,16 @@ public class QuestionServiceImpl implements QuestionService {
     public int getAnswerNumber(Question question) {
         int lastAnswerNumber = question.answers().size();
         String invalidAnswerMessage = String.format(
-                "Number of answer must be between 1 and %d",
+                "Number of answer must be between %d and %d",
+                MIN_ANSWER_NUMBER,
                 lastAnswerNumber);
-        int answerNumber = -1;
+        int answerNumber = INVALID_ANSWER_NUMBER;
         try {
             answerNumber = ioService.readIntForRange(
-                    1,
+                    MIN_ANSWER_NUMBER,
                     lastAnswerNumber,
                     invalidAnswerMessage);
+            answerNumber -= MIN_ANSWER_NUMBER;
         } catch (Exception e) {
             ioService.printLine("You failed this attempt to answer question");
         }

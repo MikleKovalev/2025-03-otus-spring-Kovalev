@@ -24,7 +24,7 @@ public class TestServiceImpl implements TestService {
 
         for (var question: questions) {
             questionService.askQuestion(question);
-            int answerNumber = questionService.getAnswerNumber(question) - 1;
+            int answerNumber = questionService.getAnswerNumber(question);
             var isAnswerValid =
                     questionService.verifyAnswer(question, answerNumber);
             testResult.applyAnswer(question, isAnswerValid);
