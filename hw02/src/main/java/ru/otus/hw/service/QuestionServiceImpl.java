@@ -25,16 +25,26 @@ public class QuestionServiceImpl implements QuestionService {
     public int getAnswerNumber(Question question) {
         int lastAnswerNumber = question.answers().size();
         String invalidAnswerMessage = String.format(
-                "Number of answers must be between 1 and %d",
+                "Number of answer must be between 1 and %d",
                 lastAnswerNumber);
-        return ioService.readIntForRange(
-                1,
-                lastAnswerNumber,
-                invalidAnswerMessage);
+        int answerNumber = -1;
+        try {
+            answerNumber = ioService.readIntForRange(
+                    1,
+                    lastAnswerNumber,
+                    invalidAnswerMessage);
+        } catch (Exception e) {
+            ioService.printLine("You failed this attempt to answer question");
+        }
+        return answerNumber;
     }
 
     @Override
     public boolean verifyAnswer(Question question, int answerNumber) {
-        return question.getCorrectAnswerNumber() == answerNumber;
+        try {
+            return question.getCorrectAnswerNumber() == answerNumber;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
