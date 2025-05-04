@@ -19,9 +19,6 @@ public class TestServiceImplTest {
     private IOService ioService;
 
     @Mock
-    private QuestionService questionService;
-
-    @Mock
     private QuestionDao questionDao;
 
     private TestService testService;
@@ -29,7 +26,7 @@ public class TestServiceImplTest {
     @BeforeEach
     public void setUp() {
         given(questionDao.findAll()).willReturn(List.of());
-        testService = new TestServiceImpl(ioService, questionService, questionDao);
+        testService = new TestServiceImpl(ioService, questionDao);
     }
 
     @Test
