@@ -1,0 +1,10 @@
+spring:
+  shell:
+    interactive:
+      enabled: false
+  main:
+    allow-circular-references: true
+test:
+  locale: en-US
+  fileNameByLocaleTag:
+    en-US: test-questions.csv
