@@ -30,13 +30,15 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        String sql = "select b.id as book_id, b.title as title, a.id as author_id, a.full_name " +
-                "as author_full_name, g.id as genre_id, g.name as genre_name " +
-                "from books b " +
-                "left join authors a on b.author_id = a.id " +
-                "left join books_genres bg on bg.book_id = b.id " +
-                "left join genres g On bg.genre_id = g.id " +
-                "where b.id = :id";
+        String sql = """
+                select b.id as book_id, b.title as title, a.id as author_id, a.full_name 
+                as author_full_name, g.id as genre_id, g.name as genre_name 
+                from books b 
+                left join authors a on b.author_id = a.id 
+                left join books_genres bg on bg.book_id = b.id 
+                left join genres g On bg.genre_id = g.id
+                where b.id = :id
+                """;
         Book maybeBook = jdbc.query(sql, Map.of("id", id), new BookResultSetExtractor());
         return Optional.ofNullable(maybeBook);
     }
@@ -64,9 +66,11 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private List<Book> getAllBooksWithoutGenres() {
-        String sql = "select b.id, b.title, b.author_id, a.full_name " +
-                     "from books b " +
-                     "left join authors a on b.author_id = a.id";
+        String sql = """
+                     select b.id, b.title, b.author_id, a.full_name
+                     from books b 
+                     left join authors a on b.author_id = a.id
+                     """;
         return jdbc.query(sql, new BookRowMapper());
     }
 
