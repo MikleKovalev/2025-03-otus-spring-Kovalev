@@ -148,21 +148,36 @@ public class JdbcBookRepository implements BookRepository {
             Book book = null;
             while (rs.next()) {
                 if (book == null) {
-                    book = new Book();
-                    book.setId(rs.getLong("id"));
-                    book.setTitle(rs.getString("title"));
-                    Author author = new Author();
-                    author.setId(rs.getLong("author_id"));
-                    author.setFullName(rs.getString("author_full_name"));
-                    book.setAuthor(author);
-                    book.setGenres(new ArrayList<>());
+                    book = setupBook(rs);
                 }
-                Genre genre = new Genre();
-                genre.setId(rs.getLong("genre_id"));
-                genre.setName(rs.getString("genre_name"));
+                Genre genre = setupGenre(rs);
                 book.getGenres().add(genre);
             }
             return book;
+        }
+
+        private Book setupBook(ResultSet rs) throws SQLException {
+            Book book = new Book();
+            book.setId(rs.getLong("id"));
+            book.setTitle(rs.getString("title"));
+            Author author = setupAuthor(rs);
+            book.setAuthor(author);
+            book.setGenres(new ArrayList<>());
+            return book;
+        }
+
+        private Author setupAuthor(ResultSet rs) throws SQLException {
+            Author author = new Author();
+            author.setId(rs.getLong("author_id"));
+            author.setFullName(rs.getString("author_full_name"));
+            return author;
+        }
+
+        private Genre setupGenre(ResultSet rs) throws SQLException {
+            Genre genre = new Genre();
+            genre.setId(rs.getLong("genre_id"));
+            genre.setName(rs.getString("genre_name"));
+            return genre;
         }
     }
 
