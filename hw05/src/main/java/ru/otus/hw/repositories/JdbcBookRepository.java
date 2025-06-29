@@ -78,15 +78,12 @@ public class JdbcBookRepository implements BookRepository {
         return jdbc.query("select book_id, genre_id from books_genres", new BookGenreRelationRowMapper());
     }
 
-    private void mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres,
-                                List<BookGenreRelation> relations) {
-        for (BookGenreRelation relation : relations) {
-            var maybeBook = booksWithoutGenres.stream().filter(b -> b.getId() == relation.bookId).findFirst();
-            var maybeGenre = genres.stream().filter(g -> g.getId() == relation.genreId).findFirst();
-            if (maybeBook.isPresent() && maybeGenre.isPresent()) {
-                maybeBook.get().getGenres().add(maybeGenre.get());
-            }
-        }
+    private void mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres, List<BookGenreRelation> relations) {
+        relations.forEach(rel -> {
+            booksWithoutGenres.stream().filter(b -> b.getId() == rel.bookId).findFirst()
+                    .ifPresent(book -> genres.stream().filter(g -> g.getId() == rel.genreId).findFirst()
+                            .ifPresent(book.getGenres()::add));
+        });
     }
 
     private Book insert(Book book) {
