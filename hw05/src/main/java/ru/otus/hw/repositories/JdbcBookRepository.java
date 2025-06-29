@@ -38,11 +38,7 @@ public class JdbcBookRepository implements BookRepository {
                 "left join genres g On bg.genre_id = g.id " +
                 "where b.id = :id";
         Book maybeBook = jdbc.query(sql, Map.of("id", id), new BookResultSetExtractor());
-        if (maybeBook != null) {
-            return Optional.of(maybeBook);
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(maybeBook);
     }
 
     @Override

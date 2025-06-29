@@ -28,11 +28,7 @@ public class JdbcAuthorRepository implements AuthorRepository {
         Author author = namedJdbc.queryForObject(
                 "select id, full_name from authors where id = :id", Map.of("id", id), new AuthorRowMapper()
         );
-        if (author == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(author);
-        }
+        return Optional.ofNullable(author);
     }
 
     private static class AuthorRowMapper implements RowMapper<Author> {
