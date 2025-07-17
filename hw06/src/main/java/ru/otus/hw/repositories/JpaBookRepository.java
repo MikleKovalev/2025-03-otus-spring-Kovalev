@@ -5,7 +5,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Book;
 
@@ -15,18 +14,21 @@ import java.util.Optional;
 import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.FETCH;
 
 @Repository
-@AllArgsConstructor
 public class JpaBookRepository implements BookRepository {
 
     @PersistenceContext
     private final EntityManager em;
+
+    public JpaBookRepository(EntityManager em) {
+        this.em = em;
+    }
 
     @Override
     public Optional<Book> findById(long id) {
         try {
             EntityGraph<?> entityGraph = em.getEntityGraph("book-author-entity-graph");
             TypedQuery<Book> query =
-                    em.createQuery("select b from Book b left join fetch b.genres where b.id = :id", Book.class);
+                    em.createQuery("select b from Book b where b.id = :id", Book.class);
             query.setHint(FETCH.getKey(), entityGraph);
             query.setParameter("id", id);
             return Optional.ofNullable(query.getSingleResult());
@@ -38,7 +40,7 @@ public class JpaBookRepository implements BookRepository {
     @Override
     public List<Book> findAll() {
         EntityGraph<?> entityGraph = em.getEntityGraph("book-author-entity-graph");
-        TypedQuery<Book> query = em.createQuery("select b from Book b left join fetch b.genres", Book.class);
+        TypedQuery<Book> query = em.createQuery("select b from Book b", Book.class);
         query.setHint(FETCH.getKey(), entityGraph);
         return query.getResultList();
     }
@@ -54,9 +56,6 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public void deleteById(long id) {
-        Book book = em.find(Book.class, id);
-        if (book != null) {
-            em.remove(book);
-        }
+        Optional.ofNullable(em.find(Book.class, id)).ifPresent(em::remove);
     }
 }
