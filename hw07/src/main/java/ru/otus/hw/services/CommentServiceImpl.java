@@ -29,7 +29,7 @@ public class CommentServiceImpl implements CommentService {
     public List<Comment> findByBook(long bookId) {
         var book = bookService.findById(bookId).orElseThrow(() ->
                 new EntityNotFoundException("Book with id " + bookId + " not found"));
-        return commentRepository.findByBook(book);
+        return commentRepository.findByBookId(book.getId());
     }
 
     @Transactional

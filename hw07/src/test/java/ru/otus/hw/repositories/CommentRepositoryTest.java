@@ -74,9 +74,7 @@ public class CommentRepositoryTest {
     @DisplayName("должен найти все комментарии для книги с id = 1")
     @Test
     void shouldFindAllCommentsForFirstBook() {
-        Book firstBook = em.find(Book.class, BOOK_FIRST_ID);
-
-        var findComments = commentRepository.findByBook(firstBook);
+        var findComments = commentRepository.findByBookId(BOOK_FIRST_ID);
         var expectedComments = getCommentsForFirstBook();
 
         assertThat(findComments).containsExactlyElementsOf(expectedComments);
