@@ -8,4 +8,6 @@ public interface GenreService {
     List<Genre> findAll();
 
     List<Genre> findByBookId(long bookId);
+
+    List<Genre> findAllById(Iterable<Long> ids);
 }

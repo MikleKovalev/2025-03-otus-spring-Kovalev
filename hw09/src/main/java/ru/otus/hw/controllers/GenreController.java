@@ -10,7 +10,6 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.mappers.GenreMapper;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.services.BookService;
-import ru.otus.hw.services.GenreService;
 
 import java.util.List;
 

@@ -29,4 +29,9 @@ public class GenreServiceImpl implements GenreService {
                 new EntityNotFoundException("Book with id %d not found".formatted(bookId)));
         return book.getGenres();
     }
+
+    @Override
+    public List<Genre> findAllById(Iterable<Long> ids) {
+        return genreRepository.findAllById(ids);
+    }
 }
