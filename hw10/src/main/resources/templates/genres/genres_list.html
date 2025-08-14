@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of genres for book</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        .genres {
+            border: 1px solid steelblue;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .genres tr td, th {
+            padding: 5px;
+            border: 1px solid steelblue;
+        }
+
+        .genres td:last-child, td:first-child {
+            width: 50px;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        .padding-top {
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h3>Genres:</h3>
+    <table class="genres" id="genresTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div class="padding-top">
+        <a th:href="@{/}">
+            <button type="button">To books list</button>
+        </a>
+    </div>
+
+    <script th:inline="javascript">
+        fetch("/api/genres/book/[[${bookId}]]")
+            .then(rawResponse => rawResponse.json())
+            .then(json => displayGenres(json))
+
+        function displayGenres(genres) {
+            const tableBody = document.querySelector('#genresTable tbody');
+            tableBody.innerHTML = '';
+
+            genres.forEach(item => {
+                console.log(item.id);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                `;
+                tableBody.appendChild(row);
+            })
+        }
+    </script>
+</body>
+</html>
