@@ -27,6 +27,7 @@
             margin-bottom: 8px;
         }
     </style>
+    <script th:src="@{/scripts.js}"></script>
 </head>
 <body>
 <h3>Books:</h3>
@@ -50,9 +51,7 @@
 </body>
 
 <script th:inline="javascript">
-    fetch('/api/books')
-        .then(response => response.json())
-        .then(json => displayBooks(json))
+    fetchBooks(displayBooks);
 
     function displayBooks(books) {
         const tableBody = document.querySelector('#books-table tbody');

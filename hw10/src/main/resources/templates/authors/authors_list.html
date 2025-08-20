@@ -27,6 +27,7 @@
             padding-top: 8px;
         }
     </style>
+    <script th:src="@{/scripts.js}"></script>
 </head>
 <body>
     <h3>Authors:</h3>
@@ -50,9 +51,7 @@
     </div>
 
     <script>
-        fetch("api/authors")
-            .then(rawResponse => rawResponse.json())
-            .then(json => displayAuthors(json))
+        fetchAuthors(displayAuthors);
 
         function displayAuthors(authors) {
             const tableBody = document.querySelector('#authorsTable tbody');

@@ -18,7 +18,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @GetMapping("api/comments/book/{id}")
+    @GetMapping("api/books/{id}/comments")
     public List<CommentDto> getCommentsForBook(@PathVariable("id") long id) {
         return commentService.findByBook(id).stream().map(commentMapper::toDto).toList();
     }

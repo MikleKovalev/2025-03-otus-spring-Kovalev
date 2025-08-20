@@ -31,6 +31,7 @@
             padding-top: 8px;
         }
     </style>
+    <script th:src="@{/scripts.js}"></script>
 </head>
 <body>
     <h3>Comments:</h3>
@@ -52,9 +53,7 @@
     </div>
 
     <script th:inline="javascript">
-        fetch("/api/comments/book/[[${bookId}]]")
-            .then(rawResponse => rawResponse.json())
-            .then(json => displayComments(json))
+        fetchCommentsForBook([[${bookId}]], displayComments);
 
         function displayComments(comments) {
             const tableBody = document.querySelector('#commentsTable tbody');

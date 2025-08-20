@@ -40,6 +40,7 @@
             padding-top: 8px;
         }
     </style>
+    <script th:src="@{/scripts.js}"></script>
 </head>
 <body>
 
@@ -62,9 +63,7 @@
     </div>
 
     <script th:inline="javascript">
-        fetch("/api/genres/book/[[${bookId}]]")
-            .then(rawResponse => rawResponse.json())
-            .then(json => displayGenres(json))
+        fetchGenresForBook([[${bookId}]], displayGenres);
 
         function displayGenres(genres) {
             const tableBody = document.querySelector('#genresTable tbody');

@@ -25,17 +25,13 @@
         color: red;
     }
   </style>
+  <script th:src="@{/scripts.js}"></script>
 </head>
 <body>
 
   <script th:inline="javascript">
-    fetch('/api/authors')
-      .then(response => response.json())
-      .then(json => displayAuthors(json));
-
-    fetch('/api/genres')
-      .then(response => response.json())
-      .then(json => displayGenres(json));
+    fetchAuthors(displayAuthors);
+    fetchGenres(displayGenres);
 
     async function createBook(event) {
       event.preventDefault();
@@ -49,16 +45,11 @@
       };
       jsonString = JSON.stringify(jsonData)
 
-      let response = await fetch('/api/books', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonString,
-      });
-      if (response.ok) {
-        window.location.href = '/';
-      }
+      postBook(jsonString, goHome);
+    }
+
+    function goHome() {
+      window.location.href = '/';
     }
 
     function displayAuthors(authors) {

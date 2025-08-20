@@ -8,7 +8,7 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 @ControllerAdvice
 public class ExceptionController {
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleEntityNotFoundEx(EntityNotFoundException ex) {
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.notFound().build();
     }
 }

@@ -25,21 +25,12 @@
         color: red;
     }
   </style>
+  <script th:src="@{/scripts.js}"></script>
 </head>
 <body>
 
 <script th:inline="javascript">
-  Promise.all([fetch('/api/books/[[${id}]]'), fetch('/api/authors'), fetch('/api/genres')])
-    .then(responses => Promise.all([responses[0].json(), responses[1].json(), responses[2].json()]))
-    .then(data => {
-      const book = data[0];
-      const authors = data[1];
-      const genres = data[2];
-
-      displayBook(book);
-      displayAuthors(authors, book.authorId);
-      displayGenres(genres, book.genreIds);
-    });
+  fetchBookById([[${id}]], displayBook, displayAuthors, displayGenres);
 
   async function editBook(event) {
     event.preventDefault();
@@ -52,18 +43,13 @@
       authorId: Number(formData.get('authorId')),
       genreIds: formData.getAll('genreIds').map(Number),
     };
-    jsonString = JSON.stringify(jsonData)
+    jsonString = JSON.stringify(jsonData);
 
-    let response = await fetch('/api/books/[[${id}]]', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonString,
-    });
-    if (response.ok) {
-      window.location.href = '/';
-    }
+    putBook(jsonString, goHome);
+  }
+
+  function goHome() {
+    window.location.href = '/';
   }
 
   function displayBook(book) {
