@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Edit book</title>
+  <style type="text/css">
+    body {
+        padding: 50px;
+    }
+
+    label {
+        display: inline-block;
+        width: 100px;
+    }
+
+    input:read-only {
+        background: lightgray;
+    }
+
+    .row {
+        margin-top: 10px;
+    }
+
+    .errors {
+        color: red;
+    }
+  </style>
+  <script th:src="@{/scripts.js}"></script>
+</head>
+<body>
+
+  <script th:inline="javascript">
+    fetchAuthors(displayAuthors);
+    fetchGenres(displayGenres);
+
+    async function createBook(event) {
+      event.preventDefault();
+
+      editForm = document.getElementById('create-form');
+      const formData = new FormData(editForm);
+      const jsonData = {
+        title: formData.get('title'),
+        authorId: Number(formData.get('authorId')),
+        genreIds: formData.getAll('genreIds').map(Number),
+
+      };
+      jsonString = JSON.stringify(jsonData)
+
+      postBook(jsonString, goHome);
+    }
+
+    function goHome() {
+      window.location.href = '/';
+    }
+
+    function displayAuthors(authors) {
+      const select = document.getElementById('author-select');
+      select.innerHTML = '';
+      authors.forEach(author => {
+        const option = document.createElement('option');
+        option.value = author.id;
+        option.textContent = author.fullName;
+        select.appendChild(option)
+      })
+    }
+
+    function displayGenres(genres) {
+      const select = document.getElementById('genres-select');
+      select.innerHTML = '';
+      genres.forEach(genre => {
+        const option = document.createElement('option');
+        option.value = genre.id;
+        option.textContent = genre.name;
+        select.appendChild(option)
+      })
+    }
+  </script>
+
+  <form id="create-form" onsubmit="createBook(event)">
+    <h3>Book Info:</h3>
+
+    <div class="row">
+      <label for="id-input">ID:</label>
+      <input id="id-input" type="text" readonly="readonly" value="1"/>
+    </div>
+
+    <div class="row">
+      <label for="book-title-input">Title:</label>
+      <input id="book-title-input" name="title" type="text"/>
+    </div>
+
+    <div class="row">
+      <label for="author-select">Author:</label>
+      <select id="author-select" name="authorId">
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="genres-select">Genres:</label>
+      <select id="genres-select" name="genreIds" multiple required>
+      </select>
+    </div>
+
+    <div class="row">
+      <button type="submit">Save</button>
+      <a href="books_list.html" th:href="@{/}">
+        <button type="button">Cancel</button>
+      </a>
+    </div>
+  </form>
+
+</body>
+</html>
