@@ -19,6 +19,6 @@ values ('Comment_1', 1),
        ('Comment_3', 2),
        ('Comment_4', 3);
 
-insert into users(username, password_hash)
-values ('user', '$2a$10$Qw/0TtHZE0sQT.ajt3aad.Vt81y4GIQp0Oo547PkbBtNv7K7wYlXa'),
-       ('admin', '$2a$10$0bXHB95eByBeTReALSUqeOMjysJx65GChZOEs6q1.7FPIiGf.D6k2');
+insert into users(username, password_hash, role)
+values ('user', '$2a$10$Qw/0TtHZE0sQT.ajt3aad.Vt81y4GIQp0Oo547PkbBtNv7K7wYlXa', 'USER'),
+       ('admin', '$2a$10$0bXHB95eByBeTReALSUqeOMjysJx65GChZOEs6q1.7FPIiGf.D6k2', 'ADMIN');

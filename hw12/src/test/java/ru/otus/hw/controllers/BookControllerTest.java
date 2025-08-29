@@ -67,24 +67,19 @@ class BookControllerTest {
     private ObjectMapper objectMapper;
 
     @DisplayName("Должен вернуться ошибка при поиске книги")
-    @WithMockUser(
-            username = "user",
-            authorities = {"ROLE_USER"}
-    )
+    @WithMockUser(username = "user")
     @Test
     void shouldGetNotFoundEntity() throws Exception {
         given(bookService.findById(NOT_CONTAIN_BOOK_ID))
                 .willThrow(new EntityNotFoundException(null));
 
-        mvc.perform(get("/api/books/%d".formatted(FIRST_BOOK_ID)))
+        mvc.perform(get("/api/books/%d".formatted(FIRST_BOOK_ID))
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
     @DisplayName("Должен обновить старую книгу")
-    @WithMockUser(
-            username = "user",
-            authorities = {"ROLE_USER"}
-    )
+    @WithMockUser(username = "user")
     @Test
     void shouldUpdateBook() throws Exception {
         Book book = getExampleOfBook();
@@ -94,16 +89,14 @@ class BookControllerTest {
                 book.getAuthor().getId(), book.getGenres().stream().map(Genre::getId).toList());
 
         mvc.perform(put("/api/books")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookUpdateDto)))
                 .andExpect(status().isNoContent());
     }
 
     @DisplayName("Not found exception при попытке обновить книгу")
-    @WithMockUser(
-            username = "user",
-            authorities = {"ROLE_USER"}
-    )
+    @WithMockUser(username = "user")
     @Test
     void notFoundExceptionByUpdate() throws Exception {
         given(bookService.update(1L, "Title_1", 1L, Set.of(1L))).willThrow(EntityNotFoundException.class);
@@ -111,16 +104,14 @@ class BookControllerTest {
                 1L, List.of(1L));
 
         mvc.perform(put("/api/books".formatted(1))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isNotFound());
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookUpdateDto)))
+                        .andExpect(status().isNotFound());
     }
 
     @DisplayName("Должен добавить новую книгу")
-    @WithMockUser(
-            username = "user",
-            authorities = {"ROLE_USER"}
-    )
+    @WithMockUser(username = "user")
     @Test
     void shouldAddNewBook() throws Exception {
         Book book = getExampleOfBook();
@@ -140,18 +131,17 @@ class BookControllerTest {
     @DisplayName("Должен перенаправить на логин при попытке добавить книгу")
     @Test
     void shouldReturn302ForCreateBook() throws Exception {
-        mvc.perform(post("/api/books"))
+        mvc.perform(post("/api/books")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection());
     }
 
     @DisplayName("Должен удалить книгу")
-    @WithMockUser(
-            username = "user",
-            authorities = {"ROLE_USER"}
-    )
+    @WithMockUser(username = "user")
     @Test
     void shouldDeleteBook() throws Exception {
-        mvc.perform(delete("/api/books/%d".formatted(FIRST_BOOK_ID)))
+        mvc.perform(delete("/api/books/%d".formatted(FIRST_BOOK_ID))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 

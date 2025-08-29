@@ -34,5 +34,6 @@ create table users (
     id bigserial,
     username varchar(50),
     password_hash varchar(500),
+    role varchar(50),
     primary key (id)
 );
