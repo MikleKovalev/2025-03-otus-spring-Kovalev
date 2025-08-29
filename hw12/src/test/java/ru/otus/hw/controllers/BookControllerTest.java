@@ -128,12 +128,12 @@ class BookControllerTest {
                 .andExpect(status().is2xxSuccessful());
     }
 
-    @DisplayName("Должен перенаправить на логин при попытке добавить книгу")
+    @DisplayName("Должен выдать ошибку авторизации")
     @Test
-    void shouldReturn302ForCreateBook() throws Exception {
+    void shouldReturn401ForCreateBook() throws Exception {
         mvc.perform(post("/api/books")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isUnauthorized());
     }
 
     @DisplayName("Должен удалить книгу")
