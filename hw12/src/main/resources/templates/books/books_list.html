@@ -67,7 +67,7 @@
                 <td><button onclick="window.location.href='/book_comments/${book.id}'">Show comments</button></td>
                 <td>
                     <button onclick="window.location.href='/edit_book/${book.id}'">Edit</button>
-                    <button onclick="fetch('/api/books/${book.id}', { method: 'DELETE' }).then(response => {window.location.href = '/';})">Delete</button>
+                    <button onclick="deleteBook(${book.id})">Delete</button>
                 </td>
             `;
             tableBody.appendChild(row);

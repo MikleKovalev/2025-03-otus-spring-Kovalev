@@ -43,10 +43,14 @@ function fetchBookById(bookId, displayBook, displayAuthors, displayGenres) {
 }
 
 function postBook(book, onResponseOk) {
+    const csrfToken = getCsrfToken();
+    const csrfHeader = getCsrfHeaderName();
+
     fetch('/api/books', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
         },
         body: book,
     }).then(response => {
@@ -57,10 +61,14 @@ function postBook(book, onResponseOk) {
 }
 
 function putBook(book, onResponseOk) {
+    const csrfToken = getCsrfToken();
+    const csrfHeader = getCsrfHeaderName();
+
     fetch('/api/books', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
         },
         body: book,
     }).then(response => {
@@ -68,4 +76,39 @@ function putBook(book, onResponseOk) {
             onResponseOk();
         }
     });
+}
+
+function deleteBook(bookId) {
+    const csrfToken = getCsrfToken();
+    const csrfHeader = getCsrfHeaderName();
+
+    fetch(`/api/books/${bookId}`, {
+        method: 'DELETE',
+        headers: {
+            [csrfHeader]: csrfToken,
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            goHome();
+        }
+    })
+}
+
+function goHome() {
+    window.location.href = '/';
+}
+
+function getCsrfToken() {
+    const name = 'XSRF-TOKEN';
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+function getCsrfHeaderName() {
+    const metaTag = document.querySelector('meta[name="_csrf_header"]');
+    return metaTag ? metaTag.getAttribute('content') : 'X-XSRF-TOKEN';
 }
