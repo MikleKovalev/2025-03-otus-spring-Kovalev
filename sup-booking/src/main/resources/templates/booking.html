@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аренда лодки</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+        .alert {
+            display: none;
+        }
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">Аренда лодки</h2>
+            </div>
+            <div class="card-body">
+                <!-- Сообщения об ошибках -->
+                <div id="errorAlert" class="alert alert-danger" role="alert"></div>
+                
+                <!-- Сообщения об успехе -->
+                <div id="successAlert" class="alert alert-success" role="alert"></div>
+
+                <form id="boatRentalForm">
+                    <!-- Поле имени -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Имя *</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+
+                    <!-- Поле телефона -->
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон *</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                    </div>
+
+                    <!-- Выбор даты и времени -->
+                    <div class="mb-3">
+                        <label class="form-label">Срок аренды *</label>
+                        <div class="datetime-group">
+                            <!-- Начало аренды -->
+                            <div class="form-group">
+                                <label for="startDate" class="form-label small">Начало аренды *</label>
+                                <input type="date" class="form-control" id="startDate" name="start_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="startTime" class="form-label small">Время начала *</label>
+                                <input type="time" class="form-control" id="startTime" name="start_time" required>
+                            </div>
+                        </div>
+                        
+                        <div class="datetime-group mt-2">
+                            <!-- Окончание аренды -->
+                            <div class="form-group">
+                                <label for="endDate" class="form-label small">Окончание аренды *</label>
+                                <input type="date" class="form-control" id="endDate" name="end_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="endTime" class="form-label small">Время окончания *</label>
+                                <input type="time" class="form-control" id="endTime" name="end_time" required>
+                            </div>
+                        </div>
+                        <div class="form-text">Укажите дату и время начала и окончания аренды</div>
+                    </div>
+
+                    <!-- Выбор лодки -->
+                    <div class="mb-3">
+                        <label for="boat" class="form-label">Выберите лодку</label>
+                        <select class="form-select" id="boat" name="boat_id">
+                            <option value="">Подберем лодку на месте</option>
+                        </select>
+                        <div class="form-text" id="boats-loading-message">Список доступных лодок загружается с сервера</div>
+                    </div>
+
+                    <!-- Выбор инструктора -->
+                    <div class="mb-3">
+                        <label for="instructor" class="form-label">Выберите инструктора</label>
+                        <select class="form-select" id="instructor" name="instructor_id">
+                            <option value="">Без инструктора</option>
+                        </select>
+                        <div class="form-text" id="instructors-loading-message">Список инструкторов загружается с сервера</div>
+                    </div>
+
+                    <!-- Кнопка отправки -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            Забронировать лодку
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Базовые URL для API (замените на реальные)
+        const API_BASE_URL = 'http://localhost:8080/api';
+        const BOATS_ENDPOINT = `${API_BASE_URL}/sup-types`;
+        const INSTRUCTORS_ENDPOINT = `${API_BASE_URL}/instructors`;
+        const RENTAL_ENDPOINT = `${API_BASE_URL}/bookings`;
+
+        // Элементы DOM
+        const boatSelect = document.getElementById('boat');
+        const instructorSelect = document.getElementById('instructor');
+        const form = document.getElementById('boatRentalForm');
+        const errorAlert = document.getElementById('errorAlert');
+        const successAlert = document.getElementById('successAlert');
+        const submitBtn = document.getElementById('submitBtn');
+        const boatLoadingMessage = document.getElementById('boats-loading-message');
+        const instructorLoadingMessage = document.getElementById('instructors-loading-message');
+        const startDate = document.getElementById('startDate');
+        const startTime = document.getElementById('startTime');
+        const endDate = document.getElementById('endDate');
+        const endTime = document.getElementById('endTime');
+
+        // Установка минимальной даты (сегодня)
+        function setMinDates() {
+            const today = new Date().toISOString().split('T')[0];
+            startDate.min = today;
+            endDate.min = today;
+        }
+
+        // Функция для создания timestamp из даты и времени
+        function createTimestamp(dateString, timeString) {
+            if (!dateString || !timeString) return null;
+            
+            const dateTimeString = `${dateString}T${timeString}`;
+            const date = new Date(dateTimeString);
+            return date.getTime(); // Возвращает timestamp в миллисекундах
+        }
+
+        // Функция для создания запроса с cookies
+        function createFetchRequest(url, options = {}) {
+            const defaultOptions = {
+                credentials: 'include', // Включаем cookies
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            };
+
+            return fetch(url, {
+                ...defaultOptions,
+                ...options
+            });
+        }
+
+        // Загрузка данных при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            setMinDates();
+            loadBoats();
+            loadInstructors();
+        });
+
+        // Функция загрузки списка лодок
+        async function loadBoats() {
+            try {
+                showLoadingState(boatSelect, 'Загрузка лодок...');
+                
+                const response = await createFetchRequest(BOATS_ENDPOINT);
+
+                hideElement(boatLoadingMessage);
+                
+                if (!response.ok) {
+                    throw new Error(`Ошибка загрузки лодок: ${response.status}`);
+                }
+                stopLoadingState(boatSelect);
+                
+                const boats = await response.json();
+                populateBoatSelect(boats);
+                
+            } catch (error) {
+                console.error('Ошибка при загрузке лодок:', error);
+                showErrorInSelect(boatSelect, 'Не удалось загрузить список лодок');
+            }
+        }
+
+        // Функция загрузки списка инструкторов
+        async function loadInstructors() {
+            try {
+                showLoadingState(instructorSelect, 'Загрузка инструкторов...');
+                
+                const response = await createFetchRequest(INSTRUCTORS_ENDPOINT);
+
+                hideElement(instructorLoadingMessage);
+                
+                if (!response.ok) {
+                    throw new Error(`Ошибка загрузки инструкторов: ${response.status}`);
+                }
+                stopLoadingState(instructorSelect);
+                
+                const instructors = await response.json();
+                populateInstructorSelect(instructors);
+                
+            } catch (error) {
+                console.error('Ошибка при загрузке инструкторов:', error);
+                showErrorInSelect(instructorSelect, 'Не удалось загрузить список инструкторов');
+            }
+        }
+
+        // Заполнение select списком лодок
+        function populateBoatSelect(boats) {
+            boatSelect.innerHTML = '<option value="">Подберем лодку на месте</option>';
+            
+            boats.forEach(boat => {
+                const option = document.createElement('option');
+                option.value = boat.id;
+                option.textContent = `${boat.name} (${boat.pricePerHour} руб/час)`;
+                boatSelect.appendChild(option);
+            });
+        }
+
+        // Заполнение select списком инструкторов
+        function populateInstructorSelect(instructors) {
+            instructorSelect.innerHTML = '<option value="">Без инструктора</option>';
+            
+            instructors.forEach(instructor => {
+                const option = document.createElement('option');
+                option.value = instructor.id;
+                option.textContent = `${instructor.name} (${instructor.pricePerHour} руб/час)`;
+                instructorSelect.appendChild(option);
+            });
+        }
+
+        // Показать состояние загрузки в select
+        function showLoadingState(selectElement, message) {
+            selectElement.innerHTML = `<option value="">${message}</option>`;
+            selectElement.disabled = true;
+        }
+
+        function stopLoadingState(selectElement) {
+            selectElement.disabled = false;
+        }
+
+        function hideElement(element) {
+            element.style.display = 'none';
+        }
+
+        // Показать ошибку в select
+        function showErrorInSelect(selectElement, message) {
+            selectElement.innerHTML = `<option value="">${message}</option>`;
+            selectElement.disabled = false;
+        }
+
+        // Обработка отправки формы
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Скрыть предыдущие сообщения
+            hideAlerts();
+            
+            // Показать состояние загрузки на кнопке
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
+            submitBtn.disabled = true;
+
+            try {
+                // Сбор данных формы
+                const formData = {
+                    clientName: document.getElementById('name').value,
+                    clientPhone: document.getElementById('phone').value,
+                    start: createTimestamp(startDate.value, startTime.value),
+                    finish: createTimestamp(endDate.value, endTime.value),
+                    supTypeId: document.getElementById('boat').value || null,
+                    instructorId: document.getElementById('instructor').value || null
+                };
+
+                // Отправка данных на сервер с cookies
+                const response = await createFetchRequest(RENTAL_ENDPOINT, {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Успешная отправка
+                    showSuccess('Лодка успешно забронирована! Мы свяжемся с вами в ближайшее время.');
+                    setMinDates();
+                    form.reset();
+                } else {
+                    // Ошибка валидации с сервера
+                    showError(result.message || 'Произошла ошибка при бронировании');
+                }
+
+            } catch (error) {
+                console.error('Ошибка при отправке формы:', error);
+                showError('Ошибка соединения с сервером. Попробуйте позже.');
+            } finally {
+                // Восстановить кнопку
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Функции для показа/скрытия сообщений
+        function showError(message) {
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            successAlert.textContent = message;
+            successAlert.style.display = 'block';
+        }
+
+        function hideAlerts() {
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'none';
+        }
+
+        // Дополнительная функция для проверки cookies (для отладки)
+        function checkCookies() {
+            console.log('Доступные cookies:', document.cookie);
+        }
+
+        // Проверим cookies при загрузке (опционально)
+        document.addEventListener('DOMContentLoaded', checkCookies);
+    </script>
+</body>
+</html>
